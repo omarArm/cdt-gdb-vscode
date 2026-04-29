@@ -84,7 +84,6 @@
         "category": "CDT-GDB",
         "title": "Set Global Output Radix to Decimal",
         "enablement": "cdt.debug.outputRadix == 'hexadecimal'"
-        "title": "Set Global Output Radix to Decimal"
       },
       {
         "title": "CDT-GDB: Set Hardware Breakpoint",
@@ -932,7 +931,6 @@
           "command": "cdt.debug.setOutputRadixToDecimal",
           "when": "inDebugMode && cdt.debug.outputRadix == 'hexadecimal' && (debugType == gdb || debugType == gdbtarget)",
           "group": "z_commands"
-          "when": "inDebugMode"
         },
         {
           "command": "cdt.debug.breakpoints.addHardwareBreakpoint",
