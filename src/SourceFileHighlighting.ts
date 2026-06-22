@@ -32,16 +32,8 @@ export class SourceFileHighlighting {
 
     private registerToEvents(): void {
         const onDidChangeActiveDebugSessionDisposable =
-            vscode.debug.onDidChangeActiveDebugSession((session) => {
-                if (!session) {
-                    this.clearExecutableLineDecorations(
-                        vscode.window.visibleTextEditors
-                    );
-                }
-                this.activeDebugSession = session;
-                this.handleOnDidChangeActiveTextEditor(
-                    vscode.window.activeTextEditor
-                );
+            vscode.debug.onDidChangeActiveDebugSession(async (session) => {
+                await this.handleOnDidChangeActiveDebugSession(session);
             });
         const onDidChangeActiveTextEditorDisposable =
             vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -93,6 +85,41 @@ export class SourceFileHighlighting {
         editor.setDecorations(this.executableLineDecorator, decorations);
     }
 
+    private async handleOnDidChangeActiveDebugSession(
+        session: vscode.DebugSession | undefined
+    ): Promise<void> {
+        if (!session) {
+            this.clearExecutableLineDecorations(
+                vscode.window.visibleTextEditors
+            );
+            vscode.commands.executeCommand(
+                'setContext',
+                'cdt.debug.sourceCodeHighlightingEnabled',
+                false
+            );
+            this.highlightingEnabled = false;
+            this.activeDebugSession = undefined;
+            return;
+        }
+        if (session.type !== 'gdb' && session.type !== 'gdbtarget') {
+            this.clearExecutableLineDecorations(
+                vscode.window.visibleTextEditors
+            );
+            vscode.commands.executeCommand(
+                'setContext',
+                'cdt.debug.sourceCodeHighlightingEnabled',
+                false
+            );
+            this.highlightingEnabled = false;
+            this.activeDebugSession = undefined;
+            return;
+        }
+        this.activeDebugSession = session;
+        await this.handleOnDidChangeActiveTextEditor(
+            vscode.window.activeTextEditor
+        );
+    }
+    
     private async getBreakpointLocations(
         editor: vscode.TextEditor
     ): Promise<DebugProtocol.BreakpointLocationsResponse['body'] | void> {
